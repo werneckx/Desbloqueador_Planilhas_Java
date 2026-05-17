@@ -106,7 +106,7 @@ public class Main {
             };
 
             System.out.println("\nDeseja continuar? [S/N]");
-            r = s.nextLine().toLowerCase().substring(0);
+            r = s.nextLine().toLowerCase().length() > 1 ? r.substring(0,1): "s" ;
         }
 
         System.out.println("Obrigado! Até mais.");
