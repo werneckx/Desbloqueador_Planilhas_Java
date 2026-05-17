@@ -38,13 +38,17 @@ public static void main(String[] args) {
 
         // Mensagem inicial do sistema
         System.out.print(
-                "\n-----------------------------------------------" +
-                "\n--- Bem vindo ao desbloqueador de planilhas ---" +
-                "\n-----------------------------------------------"
+                "\n======================================================" +
+                "\n            DESBLOQUEADOR DE PLANILHAS EXCEL         " +
+                "\n======================================================" +
+                "\n            Ferramenta de automação de arquivos       " +
+                "\n======================================================"
         );
 
         // Loop principal do programa
         while (r.equals("s")) {
+
+            System.out.println("\nAguardando seleção de arquivo...");
 
             // Abre janela para seleção do arquivo
             int retorno = seletorArquivo.showOpenDialog(null);
@@ -52,9 +56,10 @@ public static void main(String[] args) {
             // Verifica se o usuário selecionou um arquivo
             if (retorno == JFileChooser.APPROVE_OPTION){
                 arquivoSelecionado = seletorArquivo.getSelectedFile();
-                System.out.print("\nArquivo selecionado.");
+                System.out.println("\nArquivo carregado com sucesso.");
+                System.out.println("Arquivo: " + arquivoSelecionado.getName());
             } else {
-                System.out.println("\nOperação cancelada.");
+                System.out.println("\nOperação cancelada pelo usuário.");
                 break;
             }
 
@@ -76,6 +81,8 @@ public static void main(String[] args) {
                     nomeArquivoCompleto.substring(indiceExtensao);
 
             try {
+                System.out.println("\nIniciando processamento da planilha...");
+
                 // Abre o arquivo Excel para leitura
                 FileInputStream arquivo = new FileInputStream(arquivoSelecionado);
 
@@ -84,6 +91,8 @@ public static void main(String[] args) {
 
                 // Fecha o fluxo de entrada após carregar o arquivo
                 arquivo.close();
+
+                System.out.println("Removendo proteções das abas...");
 
                 // Percorre todas as abas da planilha
                 for (int i = 0; i < workbook.getNumberOfSheets(); i++) {
@@ -95,10 +104,12 @@ public static void main(String[] args) {
                     sheet.disableLocking();
                 }
 
+                System.out.println("Gerando arquivo desbloqueado...");
+
                 // Cria o arquivo de saída (novo arquivo desbloqueado)
                 FileOutputStream novoArquivo =
                         new FileOutputStream(
-                                localArquivo + nomeArquivo + "_desbloq" + extensaoArquivo
+                                localArquivo + nomeArquivo + "_desbloqueado" + extensaoArquivo
                         );
 
                 // Escreve o conteúdo modificado no novo arquivo
@@ -110,26 +121,30 @@ public static void main(String[] args) {
                 // Fecha o workbook (libera memória)
                 workbook.close();
 
-                System.out.print("\nArquivo Desbloqueado com Sucesso.");
+                System.out.println("\nProcessamento concluído com sucesso.");
+                System.out.println("Arquivo salvo em: " + localArquivo);
 
             } catch (Exception e) {
                 // Captura qualquer erro durante o processo
-                System.out.println("Erro: ");
+                System.out.println("\nErro durante o processamento do arquivo.");
+                System.out.println("Verifique se o arquivo está em uso ou corrompido.");
                 e.printStackTrace();
             }
 
             // Pergunta ao usuário se deseja repetir o processo
-            System.out.print("\nDeseja continuar? [S/N]");
+            System.out.print("\nDeseja processar outro arquivo? [S/N]: ");
 
             // Lê resposta e normaliza para minúsculo
-            r = s.nextLine().toLowerCase().length() > 1 ? r.substring(0,1): "n";
+            String input = s.nextLine().toLowerCase().trim();
+            r = input.isEmpty() ? "n" : input.substring(0, 1);
         }
 
         // Mensagem final do sistema
         System.out.print(
-                "\n---------------------------" +
-                "\n--- Obrigado! Até mais. ---" +
-                "\n---------------------------"
+                "\n======================================================" +
+                "\n                 PROCESSO FINALIZADO                 " +
+                "\n              Obrigado por utilizar o sistema        " +
+                "\n======================================================"
         );
     }
 }
