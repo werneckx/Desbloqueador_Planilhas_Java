@@ -7,24 +7,40 @@ import java.io.File;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
+import javax.swing.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
+
 //TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
 // click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
 public class Main {
     public static void main(String[] args) {
         Scanner s = new Scanner(System.in); // Inicia a váriavel s como Scanner pra ser usada duarante o projeto.
-
+        JFileChooser seletorArquivo = new JFileChooser();
+        FileNameExtensionFilter filter = new FileNameExtensionFilter(
+                "Selecione apenas arquivos do Excel.",
+                "xlsx","xlsm"
+        );
+        seletorArquivo.setFileFilter(filter);
+        File arquivoSelecionado = null;
         String r = "s";
 
         while (r.equals("s")) { // Loop pra sempre rodar o código abaixo.
             System.out.println("Digite o local do arquivo a ser desbloqueado:"); // Mensagem inicial para o usuario digitar o caminho do arquivo a desbloquear.
-            File caminho = new File(s.nextLine()); // Aguarda o usuario digitar o local do arquivo e armazena na váriavel 'caminho'.
+            int retorno = seletorArquivo.showOpenDialog(null);
+
+            if (retorno == JFileChooser.APPROVE_OPTION){
+                arquivoSelecionado = seletorArquivo.getSelectedFile();
+            } else {
+                System.out.println("Operação cancelada.");
+                break;
+            };
 
             // Pega apenas o nome do arquivo.
             // Exemplo: planilha.xlsx
-            String nomeArquivoCompleto = caminho.getName();
+            String nomeArquivoCompleto = arquivoSelecionado.getName();
 
             // Pega a pasta onde o arquivo está localizado.
-            String localArquivo = caminho.getParent() + "\\";
+            String localArquivo = arquivoSelecionado.getParent() + "\\";
 
             // Descobre a posição do último ponto no nome do arquivo.
             // Isso ajuda a separar nome e extensão.
@@ -40,13 +56,11 @@ public class Main {
             String extensaoArquivo =
                     nomeArquivoCompleto.substring(indiceExtensao);
 
-            System.out.println(localArquivo);
-
             try { // Tenta executar o código abaixo
 
                 // Cria um fluxo de entrada para ler o arquivo informado pelo usuário.
                 // O FileInputStream é responsável por abrir o arquivo Excel na memória.
-                FileInputStream arquivo = new FileInputStream(caminho);
+                FileInputStream arquivo = new FileInputStream(arquivoSelecionado);
 
 
                 // Cria um objeto Workbook a partir do arquivo lido.
