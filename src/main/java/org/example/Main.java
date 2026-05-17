@@ -13,7 +13,9 @@ public class Main {
     public static void main(String[] args) {
         Scanner s = new Scanner(System.in); // Inicia a váriavel s como Scanner pra ser usada duarante o projeto.
 
-        while (true) { // Loop pra sempre rodar o código abaixo.
+        String r = "s";
+
+        while (r.equals("s")) { // Loop pra sempre rodar o código abaixo.
             System.out.println("Digite o local do arquivo a ser desbloqueado:"); // Mensagem inicial para o usuario digitar o caminho do arquivo a desbloquear.
             File caminho = new File(s.nextLine()); // Aguarda o usuario digitar o local do arquivo e armazena na váriavel 'caminho'.
 
@@ -22,7 +24,7 @@ public class Main {
             String nomeArquivoCompleto = caminho.getName();
 
             // Pega a pasta onde o arquivo está localizado.
-            String localArquivo = caminho.getParent();
+            String localArquivo = caminho.getParent() + "\\";
 
             // Descobre a posição do último ponto no nome do arquivo.
             // Isso ajuda a separar nome e extensão.
@@ -53,8 +55,8 @@ public class Main {
                 XSSFWorkbook workbook = new XSSFWorkbook(arquivo);
                 arquivo.close(); // Fecha a váriavel arquivo da memória
 
-                Integer qtd_abas = workbook.getNumberOfSheets(); // Salva a quantidade de paginas na váriavel
-                Integer index = 0; // Define a váriavel
+                int qtd_abas = workbook.getNumberOfSheets(); // Salva a quantidade de paginas na váriavel
+                int index = 0; // Define a váriavel
 
                 while (index < qtd_abas){
 
@@ -79,14 +81,20 @@ public class Main {
 
                 workbook.write(novoArquivo); // Escreve o arquivo conforme o valor salvo no 'novoArquivo'
 
-                novoArquivo.close(); // Fecha a váriavel novoArquivo da memória.
+                novoArquivo.close();
+                workbook.close();
 
-                System.out.println("Arquivo Desbloqueado com Sucesso."); // Mensagem de Sucesso.
+                System.out.println("Arquivo Desbloqueado com Sucesso.");
 
             } catch (Exception e) { // Se der erro ele executa o código abaixo.
                 System.out.println("Erro: "); // Escreve 'Erro: '
                 e.printStackTrace(); // Especifica o Erro para o usuário.
             };
-        } // Fecha o loop.
+
+            System.out.println("\nDeseja continuar? [S/N]");
+            r = s.nextLine().toLowerCase().substring(0);
+        }
+
+        System.out.println("Obrigado! Até mais.");
     }
 }
