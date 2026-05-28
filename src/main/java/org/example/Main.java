@@ -1,100 +1,150 @@
 package org.example;
 
+// Importações para manipulação de arquivos
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.util.Scanner;
 import java.io.File;
+import java.util.Scanner;
+
+// Biblioteca Apache POI para manipular Excel (.xlsx)
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
-//TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
-// click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
-public class Main {
-    public static void main(String[] args) {
-        Scanner s = new Scanner(System.in); // Inicia a váriavel s como Scanner pra ser usada duarante o projeto.
+// Interface gráfica para seleção de arquivos
+import javax.swing.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
+public class Main {
+public static void main(String[] args) {
+
+        // Scanner para entrada do usuário via console
+        Scanner s = new Scanner(System.in);
+
+        // Componente gráfico para selecionar arquivos
+        JFileChooser seletorArquivo = new JFileChooser();
+
+        // Filtro para permitir apenas arquivos do Excel
+        FileNameExtensionFilter filter = new FileNameExtensionFilter(
+                "Arquivos do Excel",
+                "xlsx", "xls", "xlsm", "xlsb", "xltx", "xltm", "xlt", "csv"
+        );
+        seletorArquivo.setFileFilter(filter);
+
+        // Arquivo selecionado pelo usuário
+        File arquivoSelecionado = null;
+
+        // Controle do loop principal (continuar ou não)
         String r = "s";
 
-        while (r.equals("s")) { // Loop pra sempre rodar o código abaixo.
-            System.out.println("Digite o local do arquivo a ser desbloqueado:"); // Mensagem inicial para o usuario digitar o caminho do arquivo a desbloquear.
-            File caminho = new File(s.nextLine()); // Aguarda o usuario digitar o local do arquivo e armazena na váriavel 'caminho'.
+        // Mensagem inicial do sistema
+        System.out.print(
+                "\n======================================================" +
+                "\n            DESBLOQUEADOR DE PLANILHAS EXCEL         " +
+                "\n======================================================" +
+                "\n            Ferramenta de automação de arquivos       " +
+                "\n======================================================"
+        );
 
-            // Pega apenas o nome do arquivo.
-            // Exemplo: planilha.xlsx
-            String nomeArquivoCompleto = caminho.getName();
+        // Loop principal do programa
+        while (r.equals("s")) {
 
-            // Pega a pasta onde o arquivo está localizado.
-            String localArquivo = caminho.getParent() + "\\";
+            System.out.println("\nAguardando seleção de arquivo...");
 
-            // Descobre a posição do último ponto no nome do arquivo.
-            // Isso ajuda a separar nome e extensão.
+            // Abre janela para seleção do arquivo
+            int retorno = seletorArquivo.showOpenDialog(null);
+
+            // Verifica se o usuário selecionou um arquivo
+            if (retorno == JFileChooser.APPROVE_OPTION){
+                arquivoSelecionado = seletorArquivo.getSelectedFile();
+                System.out.println("\nArquivo carregado com sucesso.");
+                System.out.println("Arquivo: " + arquivoSelecionado.getName());
+            } else {
+                System.out.println("\nOperação cancelada pelo usuário.");
+                break;
+            }
+
+            // Obtém o nome completo do arquivo (com extensão)
+            String nomeArquivoCompleto = arquivoSelecionado.getName();
+
+            // Obtém o diretório onde o arquivo está localizado
+            String localArquivo = arquivoSelecionado.getParent() + "\\";
+
+            // Localiza o ponto da extensão
             int indiceExtensao = nomeArquivoCompleto.lastIndexOf(".");
 
-            // Pega apenas o nome do arquivo sem extensão.
-            // Exemplo: planilha
+            // Separa nome do arquivo (sem extensão)
             String nomeArquivo =
                     nomeArquivoCompleto.substring(0, indiceExtensao);
 
-            // Pega apenas a extensão do arquivo.
-            // Exemplo: .xlsx
+            // Separa apenas a extensão do arquivo
             String extensaoArquivo =
                     nomeArquivoCompleto.substring(indiceExtensao);
 
-            System.out.println(localArquivo);
+            try {
+                System.out.println("\nIniciando processamento da planilha...");
 
-            try { // Tenta executar o código abaixo
+                // Abre o arquivo Excel para leitura
+                FileInputStream arquivo = new FileInputStream(arquivoSelecionado);
 
-                // Cria um fluxo de entrada para ler o arquivo informado pelo usuário.
-                // O FileInputStream é responsável por abrir o arquivo Excel na memória.
-                FileInputStream arquivo = new FileInputStream(caminho);
-
-
-                // Cria um objeto Workbook a partir do arquivo lido.
-                // O XSSFWorkbook representa o arquivo Excel inteiro (.xlsx),
-                // permitindo manipular abas, células, linhas, etc.
+                // Cria o workbook (arquivo Excel completo em memória)
                 XSSFWorkbook workbook = new XSSFWorkbook(arquivo);
-                arquivo.close(); // Fecha a váriavel arquivo da memória
 
-                int qtd_abas = workbook.getNumberOfSheets(); // Salva a quantidade de paginas na váriavel
-                int index = 0; // Define a váriavel
+                // Fecha o fluxo de entrada após carregar o arquivo
+                arquivo.close();
 
-                while (index < qtd_abas){
+                System.out.println("Removendo proteções das abas...");
 
-                    // Obtém a aba da planilha.
-                    // O índice 0 representa a aba salva na váriavel.
-                    XSSFSheet sheet = workbook.getSheetAt(index);
+                // Percorre todas as abas da planilha
+                for (int i = 0; i < workbook.getNumberOfSheets(); i++) {
 
-                    // Remove a proteção/bloqueio da aba selecionada.
+                    // Obtém a aba atual
+                    XSSFSheet sheet = workbook.getSheetAt(i);
+
+                    // Remove proteção (desbloqueia a planilha)
                     sheet.disableLocking();
+                }
 
-                    index++; // Adiciona um a váriavel Index
+                System.out.println("Gerando arquivo desbloqueado...");
 
-                }; // Loop pra desbloquear aba por aba.
-
-                // Cria um fluxo de saída para salvar um novo arquivo Excel.
-                // caminho.getParent() pega a pasta do arquivo original.
-                // "\\Desbloqueado.xlsx" define o nome do novo arquivo.
+                // Cria o arquivo de saída (novo arquivo desbloqueado)
                 FileOutputStream novoArquivo =
-                    new FileOutputStream(
-                            localArquivo + nomeArquivo + "_desbloq" + extensaoArquivo
-                    );
+                        new FileOutputStream(
+                                localArquivo + nomeArquivo + "_desbloqueado" + extensaoArquivo
+                        );
 
-                workbook.write(novoArquivo); // Escreve o arquivo conforme o valor salvo no 'novoArquivo'
+                // Escreve o conteúdo modificado no novo arquivo
+                workbook.write(novoArquivo);
 
+                // Fecha o fluxo de saída
                 novoArquivo.close();
+
+                // Fecha o workbook (libera memória)
                 workbook.close();
 
-                System.out.println("Arquivo Desbloqueado com Sucesso.");
+                System.out.println("\nProcessamento concluído com sucesso.");
+                System.out.println("Arquivo salvo em: " + localArquivo);
 
-            } catch (Exception e) { // Se der erro ele executa o código abaixo.
-                System.out.println("Erro: "); // Escreve 'Erro: '
-                e.printStackTrace(); // Especifica o Erro para o usuário.
-            };
+            } catch (Exception e) {
+                // Captura qualquer erro durante o processo
+                System.out.println("\nErro durante o processamento do arquivo.");
+                System.out.println("Verifique se o arquivo está em uso ou corrompido.");
+                e.printStackTrace();
+            }
 
-            System.out.println("\nDeseja continuar? [S/N]");
-            r = s.nextLine().toLowerCase().substring(0);
+            // Pergunta ao usuário se deseja repetir o processo
+            System.out.print("\nDeseja processar outro arquivo? [S/N]: ");
+
+            // Lê resposta e normaliza para minúsculo
+            String input = s.nextLine().toLowerCase().trim();
+            r = input.isEmpty() ? "n" : input.substring(0, 1);
         }
 
-        System.out.println("Obrigado! Até mais.");
+        // Mensagem final do sistema
+        System.out.print(
+                "\n======================================================" +
+                "\n                 PROCESSO FINALIZADO                 " +
+                "\n              Obrigado por utilizar o sistema        " +
+                "\n======================================================"
+        );
     }
 }
