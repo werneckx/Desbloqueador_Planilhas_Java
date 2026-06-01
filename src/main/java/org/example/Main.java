@@ -9,6 +9,8 @@ import java.util.Scanner;
 // Biblioteca Apache POI para manipular Excel (.xlsx)
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.example.model.UnlockResult;
+import org.example.service.ExcelService;
 
 // Interface gráfica para seleção de arquivos
 import javax.swing.*;
@@ -80,56 +82,15 @@ public static void main(String[] args) {
             String extensaoArquivo =
                     nomeArquivoCompleto.substring(indiceExtensao);
 
-            try {
-                System.out.println("\nIniciando processamento da planilha...");
+            UnlockResult resultado = ExcelService.unlock(arquivoSelecionado);
 
-                // Abre o arquivo Excel para leitura
-                FileInputStream arquivo = new FileInputStream(arquivoSelecionado);
-
-                // Cria o workbook (arquivo Excel completo em memória)
-                XSSFWorkbook workbook = new XSSFWorkbook(arquivo);
-
-                // Fecha o fluxo de entrada após carregar o arquivo
-                arquivo.close();
-
-                System.out.println("Removendo proteções das abas...");
-
-                // Percorre todas as abas da planilha
-                for (int i = 0; i < workbook.getNumberOfSheets(); i++) {
-
-                    // Obtém a aba atual
-                    XSSFSheet sheet = workbook.getSheetAt(i);
-
-                    // Remove proteção (desbloqueia a planilha)
-                    sheet.disableLocking();
-                }
-
-                System.out.println("Gerando arquivo desbloqueado...");
-
-                // Cria o arquivo de saída (novo arquivo desbloqueado)
-                FileOutputStream novoArquivo =
-                        new FileOutputStream(
-                                localArquivo + nomeArquivo + "_desbloqueado" + extensaoArquivo
-                        );
-
-                // Escreve o conteúdo modificado no novo arquivo
-                workbook.write(novoArquivo);
-
-                // Fecha o fluxo de saída
-                novoArquivo.close();
-
-                // Fecha o workbook (libera memória)
-                workbook.close();
-
-                System.out.println("\nProcessamento concluído com sucesso.");
-                System.out.println("Arquivo salvo em: " + localArquivo);
-
-            } catch (Exception e) {
-                // Captura qualquer erro durante o processo
-                System.out.println("\nErro durante o processamento do arquivo.");
-                System.out.println("Verifique se o arquivo está em uso ou corrompido.");
-                e.printStackTrace();
+            if (resultado.isSuccess()) {
+                System.out.println(resultado.getMessage());
+            } else {
+                System.out.println(resultado.getMessage());
             }
+
+
 
             // Pergunta ao usuário se deseja repetir o processo
             System.out.print("\nDeseja processar outro arquivo? [S/N]: ");
